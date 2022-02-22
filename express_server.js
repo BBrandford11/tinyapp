@@ -38,7 +38,7 @@ app.get("/urls/:shortURL", (req, res) => {
   res.render("urls_show", templateVars);
 });
 
-app.get("/u/:shortURL", (req, res) => {
+app.get("/u/:shortURL", (req, res) => {// 404 handle
   console.log("checking")
   
   const longURL = urlDatabase[req.params.shortURL]
@@ -49,12 +49,12 @@ app.get("/u/:shortURL", (req, res) => {
   res.redirect(longURL);
   });
 
-app.get("/", (req, res) => {
+app.get("/", (req, res) => { // hello at base /
   res.send("Hello!");
 });
 
 
-app.get("/urls.json", (req, res) => {
+app.get("/urls.json", (req, res) => {//json url
   res.json(urlDatabase);
 });
 
@@ -62,9 +62,6 @@ app.get("/hello", (req,res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n")
 })
 
-app.get("*", (req, res) => {
-  res.render('404')
-})
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
