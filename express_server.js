@@ -31,15 +31,33 @@ app.get("/urls/:shortURL", (req, res) => {
   const templateVars = { shortURL, longURL };
   res.render("urls_show", templateVars);
 });
+
+app.get("/u/:shortURL", (req, res) => {
+  console.log("checking")
+  
+  const longURL = urlDatabase[req.params.shortURL]
+  if(!longURL) {
+    res.send('404')
+  }
+  console.log("longurl: ", longURL)
+  res.redirect(longURL);
+  });
+
 app.get("/", (req, res) => {
   res.send("Hello!");
 });
+
+
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
 });
 
 app.get("/hello", (req,res) => {
   res.send("<html><body>Hello <b>World</b></body></html>\n")
+})
+
+app.get("*", (req, res) => {
+  res.render('404')
 })
 
 app.listen(PORT, () => {
