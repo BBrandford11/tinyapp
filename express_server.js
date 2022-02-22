@@ -17,12 +17,18 @@ app.get("/urls", (req,res) => {
   const templateVars = { urls: urlDatabase}
   res.render("urls_index", templateVars)
 })
-app.post("/urls", (req, res) => {
-  console.log(req.body);  // Log the POST request body to the console
+app.post("/urls", (req, res) => {// create new url
+  console.log(req.body);  
   let longURL = req.body.longURL;
   let shortURL = generateRandomString();
   urlDatabase[shortURL] = longURL;
   res.redirect(`/urls/${shortURL}`);
+});
+
+app.post("/urls/:shortURL/delete", (req, res) => {//delete a url;  
+  const shortURL = req.params.shortURL;
+  delete urlDatabase[shortURL];
+  res.redirect("/urls");
 });
 
 app.get("/urls/:shortURL", (req, res) => {
