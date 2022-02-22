@@ -13,7 +13,7 @@ const urlDatabase = {
 app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
-app.get("/urls", (req,res) => {
+app.get("/urls", (req,res) => { // main render to url
   const templateVars = { urls: urlDatabase}
   res.render("urls_index", templateVars)
 })
@@ -28,6 +28,14 @@ app.post("/urls", (req, res) => {// create new url
 app.post("/urls/:shortURL/delete", (req, res) => {//delete a url;  
   const shortURL = req.params.shortURL;
   delete urlDatabase[shortURL];
+  res.redirect("/urls");
+});
+
+app.post("/urls/:shortURL", (req, res) => {//edit a url;  
+  const shortURL = req.params.shortURL;
+  const newURL = req.body.longURL
+  console.log("update", newURL)
+  urlDatabase[shortURL] = newURL;
   res.redirect("/urls");
 });
 
