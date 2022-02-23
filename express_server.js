@@ -59,7 +59,7 @@ app.post("/logout", (req, res) => {//logout;
   res.redirect("/urls");
 });
 
-app.get("/urls/:shortURL", (req, res) => {
+app.get("/urls/:shortURL", (req, res) => { //get reqest to short url
   let shortURL = req.params.shortURL
   let longURL = urlDatabase[shortURL]
   const templateVars = { 
@@ -90,7 +90,7 @@ app.get("/urls.json", (req, res) => {//json url
   res.json(urlDatabase);
 });
 
-app.get("/hello", (req,res) => {
+app.get("/hello", (req,res) => { // basic hello world at /hello
   res.send("<html><body>Hello <b>World</b></body></html>\n")
 })
 
@@ -99,6 +99,7 @@ app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
 });
 
+// random generator for URL Id
 function generateRandomString(length = 6) {
   return Math.random().toString(20).substr(2, length)
 }
