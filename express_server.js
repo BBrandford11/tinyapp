@@ -25,6 +25,20 @@ app.get("/urls", (req,res) => { // main render to url
     }
   res.render("urls_index", templateVars)
 })
+app.post("/register", (req, res) => {//post to register
+  console.log(req.body)  
+  // const username = req.body.username
+  // res.cookie("username", username)
+  res.redirect("/urls");
+});
+
+app.get("/register", (req,res) => { // get to register
+  const templateVars = { urls:
+     urlDatabase,
+     username: req.cookies["username"]
+    }
+  res.render("register", templateVars)
+})
 app.post("/urls", (req, res) => {// create new url
   console.log(req.body);  
   let longURL = req.body.longURL;
