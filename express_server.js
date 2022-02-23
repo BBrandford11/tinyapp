@@ -7,6 +7,10 @@ app.use(bodyParser.urlencoded({extended: true}));
 var cookieParser = require('cookie-parser')
 app.use(cookieParser())
 
+const users = {
+
+}
+
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
@@ -25,10 +29,13 @@ app.get("/urls", (req,res) => { // main render to url
     }
   res.render("urls_index", templateVars)
 })
-app.post("/register", (req, res) => {//post to register
-  console.log(req.body)  
-  // const username = req.body.username
-  // res.cookie("username", username)
+app.post("/register", (req, res) => {//post to register adding new user and cookie
+  const { email, password, id } = req.body
+  //console.log(email)
+  const mainId = generateRandomString()
+  users[mainId] = {email, password, id}
+  console.log(users)
+  res.cookie("user id" ,users[mainId].email)
   res.redirect("/urls");
 });
 
