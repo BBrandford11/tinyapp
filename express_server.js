@@ -11,8 +11,12 @@ const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
   "9sm5xK": "http://www.google.com"
 };
-app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+app.get("/urls/new", (req, res) => {// new url 
+  const templateVars = { 
+    username: req.cookies["username"],
+    
+   }
+  res.render("urls_new", templateVars);
 });
 app.get("/urls", (req,res) => { // main render to url
   const templateVars = { urls:
