@@ -4,7 +4,8 @@ const PORT = 8080; // default port 8080
 app.set("view engine", "ejs")
 const bodyParser = require("body-parser");
 app.use(bodyParser.urlencoded({extended: true}));
-
+var cookieParser = require('cookie-parser')
+app.use(cookieParser())
 
 const urlDatabase = {
   "b2xVn2": "http://www.lighthouselabs.ca",
@@ -14,7 +15,10 @@ app.get("/urls/new", (req, res) => {
   res.render("urls_new");
 });
 app.get("/urls", (req,res) => { // main render to url
-  const templateVars = { urls: urlDatabase}
+  const templateVars = { urls:
+     urlDatabase,
+     username: req.cookies["username"]
+    }
   res.render("urls_index", templateVars)
 })
 app.post("/urls", (req, res) => {// create new url
@@ -39,15 +43,26 @@ app.post("/urls/:shortURL", (req, res) => {//edit a url;
   res.redirect("/urls");
 });
 
-app.post("/urls/:shortURL", (req, res) => {//login;  
-  
+app.post("/login", (req, res) => {//login;
+  console.log(req.body)  
+  const username = req.body.username
+  res.cookie("username", username)
+  res.redirect("/urls");
+});
+
+app.post("/logout", (req, res) => {//logout;
+  res.clearCookie("username", req.body.username);
   res.redirect("/urls");
 });
 
 app.get("/urls/:shortURL", (req, res) => {
   let shortURL = req.params.shortURL
   let longURL = urlDatabase[shortURL]
-  const templateVars = { shortURL, longURL };
+  const templateVars = { 
+    shortURL, 
+    longURL,
+    username: req.cookies["username"]
+   };
   res.render("urls_show", templateVars);
 });
 
