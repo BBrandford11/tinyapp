@@ -35,9 +35,27 @@ app.get("/urls", (req,res) => { // main render to url
     }
   res.render("urls_index", templateVars)
 })
+
+const emailExists = function(email) {
+  for(let i in users){
+    if(users[i].email === email) {
+      return true
+    }    
+  }
+  return false
+}
+
 app.post("/register", (req, res) => {  //post to register adding new user and cookie
   const { email, password } = req.body
   const id = generateRandomString()
+  if(!email|| !password) {
+    return res.status(400).send('Bad Request');
+  }
+  
+  if(emailExists(email)) {
+    return res.status(400).send('Bad Request');
+  }
+
   users[id] = {email, password, id}
   res.cookie("userId" ,users[id].id)
   res.redirect("/urls");
