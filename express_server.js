@@ -8,6 +8,11 @@ var cookieParser = require('cookie-parser')
 app.use(cookieParser())
 
 const users = {
+  123: {
+    email: 'test@lhl.com',
+    password: 456,
+    id: "labs"
+  }
 
 }
 
@@ -17,32 +22,33 @@ const urlDatabase = {
 };
 app.get("/urls/new", (req, res) => {// new url 
   const templateVars = { 
-    username: req.cookies["username"],
-    
+    users    
    }
   res.render("urls_new", templateVars);
 });
 app.get("/urls", (req,res) => { // main render to url
+  const cookieId = req.cookies.userId
+  const user = users[cookieId]
   const templateVars = { urls:
      urlDatabase,
-     username: req.cookies["username"]
+     user
     }
   res.render("urls_index", templateVars)
 })
-app.post("/register", (req, res) => {//post to register adding new user and cookie
-  const { email, password, id } = req.body
-  //console.log(email)
-  const mainId = generateRandomString()
-  users[mainId] = {email, password, id}
-  console.log(users)
-  res.cookie("user id" ,users[mainId].email)
+app.post("/register", (req, res) => {  //post to register adding new user and cookie
+  const { email, password } = req.body
+  const id = generateRandomString()
+  users[id] = {email, password, id}
+  res.cookie("userId" ,users[id].id)
   res.redirect("/urls");
 });
 
 app.get("/register", (req,res) => { // get to register
+  const cookieId = req.cookies.userId
+  const user = users[cookieId]
   const templateVars = { urls:
      urlDatabase,
-     username: req.cookies["username"]
+     user
     }
   res.render("register", templateVars)
 })
@@ -71,7 +77,7 @@ app.post("/urls/:shortURL", (req, res) => {//edit a url;
 app.post("/login", (req, res) => {//login;
   console.log(req.body)  
   const username = req.body.username
-  res.cookie("username", username)
+  //res.cookie("username", username)
   res.redirect("/urls");
 });
 
@@ -86,7 +92,7 @@ app.get("/urls/:shortURL", (req, res) => { //get reqest to short url
   const templateVars = { 
     shortURL, 
     longURL,
-    username: req.cookies["username"]
+    users
    };
   res.render("urls_show", templateVars);
 });
