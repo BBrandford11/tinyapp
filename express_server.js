@@ -35,6 +35,14 @@ app.get("/urls", (req,res) => { // main render to url
     }
   res.render("urls_index", templateVars)
 })
+const userExists = function(email, password) { //loop to check if email already exitsts
+  for(let key in users){
+    if(users[key].email === email && users[key].password === password) {
+      return key
+    }    
+  }
+  
+}
 
 const emailExists = function(email) { //loop to check if email already exitsts
   for(let key in users){
@@ -105,14 +113,15 @@ app.get("/login", (req,res) => { // get to login
 app.post("/login", (req, res) => {//login post;
   const { email, password} = req.body
   console.log("awdsd", req.body)
-  
+  const user = userExists(email, password)
   if(!email|| !password) {
     return res.status(400).send('Bad Request');  }
   
-  // if(!emailExists(email)) {
-  //   return res.status(400).send('Bad Request');
-  // }
-  res.cookie("userId", emailExists(email))
+  if(!user) {
+    return res.status(400).send('Bad Request');
+  }
+  
+  res.cookie("userId", user)
   res.redirect("/urls");
 });
 
