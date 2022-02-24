@@ -14,8 +14,18 @@ const users = {
     id: 123,
   },
 };
-const userExists = function (email, password) {
-  //loop to check if email already exitsts
+const urlsForUser = function(id) {
+  const usersUrls = {}
+  for (const shortUrl in urlDatabase) {
+    if(urlDatabase[shortUrl].userID === id) {
+      usersUrls[shortUrl] = urlDatabase[shortUrl]
+    }
+  }
+  return usersUrls
+
+}
+
+const userExists = function (email, password) {  //loop to check if email already exitsts
   for (let key in users) {
     if (users[key].email === email && users[key].password === password) {
       return key;
@@ -23,8 +33,7 @@ const userExists = function (email, password) {
   }
 };
 
-const emailExists = function (email) {
-  //loop to check if email already exitsts
+const emailExists = function (email) {  //loop to check if email already exitsts
   for (let key in users) {
     if (users[key].email === email) {
       return key;
@@ -56,16 +65,18 @@ app.get("/urls/new", (req, res) => {
   };
   res.render("urls_new", templateVars);
 });
-app.get("/urls", (req, res) => {
-  // main render to url
+app.get("/urls", (req, res) => {  // main render to url
   const cookieId = req.cookies.userId;
   const user = users[cookieId];
-  const templateVars = { urls: urlDatabase, user };
+  const filtered = urlsForUser(req.cookies.userId)
+  console.log("Filetered urls", filtered)
+  const templateVars = {
+    urls: filtered,
+    user };
   res.render("urls_index", templateVars);
 });
 
-app.post("/register", (req, res) => {
-  //post to register adding new user and cookie
+app.post("/register", (req, res) => {  //post to register adding new user and cookie
   const { email, password } = req.body;
   const id = generateRandomString();
   if (!email || !password) {
@@ -81,35 +92,31 @@ app.post("/register", (req, res) => {
   res.redirect("/urls");
 });
 
-app.get("/register", (req, res) => {
-  // get to register
+app.get("/register", (req, res) => {  // get to register
   const cookieId = req.cookies.userId;
   const user = users[cookieId];
   const templateVars = { urls: urlDatabase, user };
   res.render("register", templateVars);
 });
-app.post("/urls", (req, res) => {
-  // create new url!!!!!!!!!!!!!!!!!!!!!!!
+app.post("/urls", (req, res) => {  // create new url!!!!!!!!!!!!!!!!!!!!!!!
   console.log(req.body, "FUCKING HERE");
   const cookieId = req.cookies.userId;
   let longURL = req.body.longURL;
   let shortURL = generateRandomString();
   urlDatabase[shortURL] = {
     longURL: longURL,
-    userId: cookieId,
+    userID: cookieId,
   };
   res.redirect(`/urls/${shortURL}`);
 });
 
-app.post("/urls/:shortURL/delete", (req, res) => {
-  //delete a url;
+app.post("/urls/:shortURL/delete", (req, res) => {  //delete a url;
   const shortURL = req.params.shortURL;
   delete urlDatabase[shortURL];
   res.redirect("/urls");
 });
 
-app.post("/urls/:shortURL", (req, res) => {
-  //edit a url;
+app.post("/urls/:shortURL", (req, res) => {  //edit a url;
   const shortURL = req.params.shortURL;
   const newURL = req.body.longURL;
   console.log("update", newURL);
@@ -117,16 +124,14 @@ app.post("/urls/:shortURL", (req, res) => {
   res.redirect("/urls");
 });
 
-app.get("/login", (req, res) => {
-  // get to login
+app.get("/login", (req, res) => {  // get to login
   const cookieId = req.cookies.userId;
   const user = users[cookieId];
   const templateVars = { urls: urlDatabase, user };
   res.render("login", templateVars);
 });
 
-app.post("/login", (req, res) => {
-  //login post;
+app.post("/login", (req, res) => {  //login post;
   const { email, password } = req.body;
   console.log("awdsd", req.body);
   const user = userExists(email, password);
@@ -142,15 +147,13 @@ app.post("/login", (req, res) => {
   res.redirect("/urls");
 });
 
-app.post("/logout", (req, res) => {
-  //logout;!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+app.post("/logout", (req, res) => {  //logout;!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   console.log("logout");
   res.clearCookie("userId");
   res.redirect("/urls");
 });
 
-app.get("/urls/:shortURL", (req, res) => {
-  //get reqest to short url
+app.get("/urls/:shortURL", (req, res) => {  //get reqest to short url
   let shortURL = req.params.shortURL;
   let longURL = urlDatabase[shortURL].longURL;
   const cookieId = req.cookies.userId;
