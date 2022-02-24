@@ -11,7 +11,7 @@ const users = {
   123: {
     email: 'test@lhl.com',
     password: 456,
-    id: "labs"
+    id: 123
   }
 
 }
@@ -37,12 +37,12 @@ app.get("/urls", (req,res) => { // main render to url
 })
 
 const emailExists = function(email) { //loop to check if email already exitsts
-  for(let i in users){
-    if(users[i].email === email) {
-      return true
+  for(let key in users){
+    if(users[key].email === email) {
+      return key
     }    
   }
-  return false
+  
 }
 
 app.post("/register", (req, res) => {  //post to register adding new user and cookie
@@ -104,14 +104,15 @@ app.get("/login", (req,res) => { // get to login
 
 app.post("/login", (req, res) => {//login post;
   const { email, password} = req.body
-  if(!email|| !password) {
-    return res.status(400).send('Bad Request');
-  }
+  console.log("awdsd", req.body)
   
-  if(emailExists(email)) {
-    return res.status(400).send('Bad Request');
-  }
-  res.cookie("userId" ,users[id].id)  
+  if(!email|| !password) {
+    return res.status(400).send('Bad Request');  }
+  
+  // if(!emailExists(email)) {
+  //   return res.status(400).send('Bad Request');
+  // }
+  res.cookie("userId", emailExists(email))
   res.redirect("/urls");
 });
 
