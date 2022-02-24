@@ -16,10 +16,12 @@
          <button type="submit" class="btn btn-light">Logout</button>
       <% } else { %>
 
-      <form method="POST" action="login">      
-      <input name="username" placeholder="Username">
+      <form method="get" action="register">      
+      <button type="submit" class="btn btn-light">Register</button>
+      </form>
+      <form method="get" action="login">      
       <button type="submit" class="btn btn-light">Login</button>
-    </form>
+      </form>
     <% } %>
   </nav>
 </header>

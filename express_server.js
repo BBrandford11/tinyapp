@@ -36,7 +36,7 @@ app.get("/urls", (req,res) => { // main render to url
   res.render("urls_index", templateVars)
 })
 
-const emailExists = function(email) {
+const emailExists = function(email) { //loop to check if email already exitsts
   for(let i in users){
     if(users[i].email === email) {
       return true
@@ -92,15 +92,31 @@ app.post("/urls/:shortURL", (req, res) => {//edit a url;
   res.redirect("/urls");
 });
 
-app.post("/login", (req, res) => {//login;
-  console.log(req.body)  
-  const username = req.body.username
-  //res.cookie("username", username)
+app.get("/login", (req,res) => { // get to login
+  const cookieId = req.cookies.userId
+  const user = users[cookieId]
+  const templateVars = { urls:
+     urlDatabase,
+     user
+    }
+  res.render("login", templateVars)
+})
+
+app.post("/login", (req, res) => {//login post;
+  const { email, password} = req.body
+  if(!email|| !password) {
+    return res.status(400).send('Bad Request');
+  }
+  
+  if(emailExists(email)) {
+    return res.status(400).send('Bad Request');
+  }
+  res.cookie("userId" ,users[id].id)  
   res.redirect("/urls");
 });
 
 app.post("/logout", (req, res) => {//logout;
-  res.clearCookie("username", req.body.username);
+  res.clearCookie("userId");
   res.redirect("/urls");
 });
 
