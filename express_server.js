@@ -15,26 +15,6 @@ const users = {
   }
 
 }
-
-const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
-};
-app.get("/urls/new", (req, res) => {// new url 
-  const templateVars = { 
-    users    
-   }
-  res.render("urls_new", templateVars);
-});
-app.get("/urls", (req,res) => { // main render to url
-  const cookieId = req.cookies.userId
-  const user = users[cookieId]
-  const templateVars = { urls:
-     urlDatabase,
-     user
-    }
-  res.render("urls_index", templateVars)
-})
 const userExists = function(email, password) { //loop to check if email already exitsts
   for(let key in users){
     if(users[key].email === email && users[key].password === password) {
@@ -49,9 +29,31 @@ const emailExists = function(email) { //loop to check if email already exitsts
     if(users[key].email === email) {
       return key
     }    
-  }
-  
+  }  
 }
+
+const urlDatabase = {
+  "b2xVn2": "http://www.lighthouselabs.ca",
+  "9sm5xK": "http://www.google.com"
+};
+app.get("/urls/new", (req, res) => {// new url 
+  const cookieId = req.cookies.userId
+  const user = users[cookieId]
+  const templateVars = { 
+    urlDatabase,
+    user
+   }
+  res.render("urls_new", templateVars);
+});
+app.get("/urls", (req,res) => { // main render to url
+  const cookieId = req.cookies.userId
+  const user = users[cookieId]
+  const templateVars = { urls:
+     urlDatabase,
+     user
+    }
+  res.render("urls_index", templateVars)
+})
 
 app.post("/register", (req, res) => {  //post to register adding new user and cookie
   const { email, password } = req.body
@@ -78,8 +80,8 @@ app.get("/register", (req,res) => { // get to register
     }
   res.render("register", templateVars)
 })
-app.post("/urls", (req, res) => {// create new url
-  console.log(req.body);  
+app.post("/urls", (req, res) => {// create new url!!!!!!!!!!!!!!!!!!!!!!!
+  console.log(req.body, "FUCKING HERE");  
   let longURL = req.body.longURL;
   let shortURL = generateRandomString();
   urlDatabase[shortURL] = longURL;
@@ -125,7 +127,8 @@ app.post("/login", (req, res) => {//login post;
   res.redirect("/urls");
 });
 
-app.post("/logout", (req, res) => {//logout;
+app.post("/logout", (req, res) => {//logout;!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+  console.log("logout")
   res.clearCookie("userId");
   res.redirect("/urls");
 });
@@ -133,24 +136,26 @@ app.post("/logout", (req, res) => {//logout;
 app.get("/urls/:shortURL", (req, res) => { //get reqest to short url
   let shortURL = req.params.shortURL
   let longURL = urlDatabase[shortURL]
+  const cookieId = req.cookies.userId
+  const user = users[cookieId]
   const templateVars = { 
     shortURL, 
     longURL,
-    users
+    user
    };
   res.render("urls_show", templateVars);
 });
 
-app.get("/u/:shortURL", (req, res) => {// 404 handle
+app.get("/u/:shortURL", (req, res) => {//
   console.log("checking")
   
   const longURL = urlDatabase[req.params.shortURL]
   if(!longURL) {
     res.send('404')
   }
-  console.log("longurl: ", longURL)
+  console.log("longurl899: ", longURL)
   res.redirect(longURL);
-  });
+});
 
 app.get("/", (req, res) => { // hello at base /
   res.send("Hello!");
