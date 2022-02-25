@@ -1,16 +1,25 @@
 const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
-app.set("view engine", "ejs");
 const bodyParser = require("body-parser");
+const bcrypt = require('bcryptjs');
+//const cookieParser = require("cookie-parser");
+const cookieSession = require('cookie-session')
+
+app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
-var cookieParser = require("cookie-parser");
-app.use(cookieParser());
+//app.use(cookieParser());
+app.use(cookieSession({
+  name: 'session',
+  keys: ["encrypt", "decrypt"],
+
+}))
+
 
 const users = {
   123: {
     email: "test@lhl.com",
-    password: 456,
+    password: bcrypt.hashSync("456", 10),
     id: 123,
   },
 };
@@ -35,12 +44,13 @@ const urlsForUser = function(id) {
 
 }
 
-const userExists = function (email, password) {  //loop to check if email already exitsts
+const userExists = function (email) {  //loop to check if email already exitsts
   for (let key in users) {
-    if (users[key].email === email && users[key].password === password) {
-      return key;
+    if (users[key].email === email) {
+      return users[key];
     }
   }
+  return null;
 };
 
 const emailExists = function (email) {  //loop to check if email already exitsts
@@ -66,10 +76,10 @@ const urlDatabase = {
 //   "9sm5xK": "http://www.google.com"
 // };
 app.get("/urls/new", (req, res) => {  // new url
-  if (!req.cookies.userId) {
+  if (!req.session.id) {
     res.redirect("/login")
   }
-  const cookieId = req.cookies.userId;
+  const cookieId = req.session.id;
   const user = users[cookieId];
   const templateVars = {
     urlDatabase,
@@ -79,13 +89,15 @@ app.get("/urls/new", (req, res) => {  // new url
 });
 app.get("/urls", (req, res) => {  // main render to url
   
-  const cookieId = req.cookies.userId;
+  const cookieId = req.session.id;
+  console.log(cookieId)
   const user = users[cookieId];
-  const filtered = urlsForUser(req.cookies.userId)
-  console.log("Filetered urls", filtered)
+  const filtered = urlsForUser(req.session.id)
+  console.log(req.session)
   const templateVars = {
     urls: filtered,
-    user };
+    user
+   };
   res.render("urls_index", templateVars);
 });
 
@@ -93,32 +105,40 @@ app.post("/register", (req, res) => {  //post to register adding new user and co
   const { email, password } = req.body;
   const id = generateRandomString();
   if (!email || !password) {
-    return res.status(400).send("Bad Request");
+    return res.status(400).send("Email and password should not be empty.");
   }
 
   if (emailExists(email)) {
-    return res.status(400).send("Bad Request");
+    return res.status(400).send("Email already exists");
   }
+  const hashedPassword = bcrypt.hashSync(password, 10);
+  users[id] = {
+    id,
+    password: hashedPassword,
+    email
+  };
+  console.log(users);
+  req.session["id"] = id
+  res.redirect('/urls')
 
-  users[id] = { email, password, id };
-  res.cookie("userId", users[id].id);
-  res.redirect("/urls");
 });
 
 app.get("/register", (req, res) => {  // get to register
-  const cookieId = req.cookies.userId;
+  const cookieId = req.session.id;
   const user = users[cookieId];
   const templateVars = { urls: urlDatabase, user };
   res.render("register", templateVars);
 });
 app.post("/urls", (req, res) => {  // create new url!!!!!!!!!!!!!!!!!!!!!!!
-  console.log(req.body, "FUCKING HERE");
-  const cookieId = req.cookies.userId;
+  //console.log(req.body, "FUCKING HERE");
+  const cookieId = req.session.id;
+  const user = users[cookieId]
   let longURL = req.body.longURL;
   let shortURL = generateRandomString();
   urlDatabase[shortURL] = {
     longURL: longURL,
     userID: cookieId,
+    user
   };
   res.redirect(`/urls/${shortURL}`);
 });
@@ -130,7 +150,7 @@ app.post("/urls/:shortURL/delete", (req, res) => {  //delete a url;
     return res.status(400).send("Bad Request");
   }
   const longURL = urlDatabase[shortURL].longURL;
-  const cookieId = req.cookies.userId;
+  const cookieId = req.session.id;
   const user = users[cookieId];
   
   if (!user || urlDatabase[shortURL].userID !== user.id) {
@@ -148,7 +168,7 @@ app.post("/urls/:shortURL", (req, res) => {  //edit a url;
     return res.status(400).send("Bad Request");
   }
   const longURL = urlDatabase[shortURL].longURL;
-  const cookieId = req.cookies.userId;
+  const cookieId = req.session.id;
   const user = users[cookieId];
   
   if (!user || urlDatabase[shortURL].userID !== user.id) {
@@ -157,37 +177,43 @@ app.post("/urls/:shortURL", (req, res) => {  //edit a url;
  
  
   const newURL = req.body.longURL;
-  console.log("update", newURL);
+  //console.log("update", newURL);
   urlDatabase[shortURL].longURL = newURL;
   res.redirect("/urls");
 });
 
 app.get("/login", (req, res) => {  // get to login
-  const cookieId = req.cookies.userId;
+  const cookieId = req.session.id;
   const user = users[cookieId];
   const templateVars = { urls: urlDatabase, user };
   res.render("login", templateVars);
 });
 
 app.post("/login", (req, res) => {  //login post;
-  const { email, password } = req.body;
-  console.log("awdsd", req.body);
-  const user = userExists(email, password);
+  const { email, password } = req.body;  
+  const user = userExists(email);
+
   if (!email || !password) {
-    return res.status(400).send("Bad Request");
+    return res.status(400).send("Bad Request 1");
   }
 
   if (!user) {
-    return res.status(400).send("Bad Request");
+    return res.status(400).send("Bad Request 2");
   }
+  console.log(password, user.password)
+  if(bcrypt.compareSync(password, user.password)) {
+    req.session.id = user.id;
+        res.redirect("/urls")
+  } else {
+    return res.status(401).send('password incorrect')
 
-  res.cookie("userId", user);
-  res.redirect("/urls");
+  }
+      
 });
 
 app.post("/logout", (req, res) => {  //logout;!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   console.log("logout");
-  res.clearCookie("userId");
+  req.session.id = null;
   res.redirect("/urls");
 });
 
@@ -199,7 +225,7 @@ app.get("/urls/:shortURL", (req, res) => {  //get reqest to short url
     return res.status(400).send("Bad Request");
   }
   const longURL = urlDatabase[shortURL].longURL;
-  const cookieId = req.cookies.userId;
+  const cookieId = req.session.id;
   const user = users[cookieId];
   
 
@@ -245,7 +271,7 @@ app.get("/hello", (req, res) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
+  //console.log(`Example app listening on port ${PORT}!`);
 });
 
 // random generator for URL Id
