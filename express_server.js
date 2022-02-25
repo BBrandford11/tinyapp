@@ -5,6 +5,7 @@ const bodyParser = require("body-parser");
 const bcrypt = require('bcryptjs');
 //const cookieParser = require("cookie-parser");
 const cookieSession = require('cookie-session')
+const {urlsForUser, userExists, emailExists} = require("./helper")
 
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -24,42 +25,6 @@ const users = {
   },
 };
 
-const idFromUsers = function (id) {
-  for (const user in users) {
-    if (users[user].id === id) {
-      return true;
-    }
-  }
-  return false
-};
-
-const urlsForUser = function(id) {
-  const usersUrls = {}
-  for (const shortUrl in urlDatabase) {
-    if(urlDatabase[shortUrl].userID === id) {
-      usersUrls[shortUrl] = urlDatabase[shortUrl]
-    }
-  }
-  return usersUrls
-
-}
-
-const userExists = function (email) {  //loop to check if email already exitsts
-  for (let key in users) {
-    if (users[key].email === email) {
-      return users[key];
-    }
-  }
-  return null;
-};
-
-const emailExists = function (email) {  //loop to check if email already exitsts
-  for (let key in users) {
-    if (users[key].email === email) {
-      return key;
-    }
-  }
-};
 const urlDatabase = {
   b6UTxQ: {
     longURL: "https://www.tsn.ca",
@@ -90,10 +55,8 @@ app.get("/urls/new", (req, res) => {  // new url
 app.get("/urls", (req, res) => {  // main render to url
   
   const cookieId = req.session.id;
-  console.log(cookieId)
   const user = users[cookieId];
-  const filtered = urlsForUser(req.session.id)
-  console.log(req.session)
+  const filtered = urlsForUser(req.session.id)  
   const templateVars = {
     urls: filtered,
     user
@@ -116,8 +79,7 @@ app.post("/register", (req, res) => {  //post to register adding new user and co
     id,
     password: hashedPassword,
     email
-  };
-  console.log(users);
+  };  
   req.session["id"] = id
   res.redirect('/urls')
 
@@ -129,8 +91,7 @@ app.get("/register", (req, res) => {  // get to register
   const templateVars = { urls: urlDatabase, user };
   res.render("register", templateVars);
 });
-app.post("/urls", (req, res) => {  // create new url!!!!!!!!!!!!!!!!!!!!!!!
-  //console.log(req.body, "FUCKING HERE");
+app.post("/urls", (req, res) => {  // create new url!!!!!!!!!!!!!!!!!!!!!!!  
   const cookieId = req.session.id;
   const user = users[cookieId]
   let longURL = req.body.longURL;
@@ -177,7 +138,6 @@ app.post("/urls/:shortURL", (req, res) => {  //edit a url;
  
  
   const newURL = req.body.longURL;
-  //console.log("update", newURL);
   urlDatabase[shortURL].longURL = newURL;
   res.redirect("/urls");
 });
@@ -199,8 +159,7 @@ app.post("/login", (req, res) => {  //login post;
 
   if (!user) {
     return res.status(400).send("Bad Request 2");
-  }
-  console.log(password, user.password)
+  }  
   if(bcrypt.compareSync(password, user.password)) {
     req.session.id = user.id;
         res.redirect("/urls")
@@ -271,10 +230,16 @@ app.get("/hello", (req, res) => {
 });
 
 app.listen(PORT, () => {
-  //console.log(`Example app listening on port ${PORT}!`);
+   console.log(`Example app listening on port ${PORT}!`);
 });
 
 // random generator for URL Id
 function generateRandomString(length = 6) {
   return Math.random().toString(20).substr(2, length);
+}
+
+
+module.exports = {
+  urlDatabase,
+  users
 }
