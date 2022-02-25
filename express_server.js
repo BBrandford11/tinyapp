@@ -5,7 +5,7 @@ const bodyParser = require("body-parser");
 const bcrypt = require('bcryptjs');
 //const cookieParser = require("cookie-parser");
 const cookieSession = require('cookie-session')
-const {urlsForUser, userExists, emailExists} = require("./helper")
+const { userExists, emailExists, urlsForUser} = require("./helper")
 
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -26,14 +26,14 @@ const users = {
 };
 
 const urlDatabase = {
-  b6UTxQ: {
-    longURL: "https://www.tsn.ca",
-    userID: "aJ48lW",
-  },
-  i3BoGr: {
-    longURL: "https://www.google.ca",
-    userID: "aJ48lW",
-  },
+  // b6UTxQ: {
+  //   longURL: "https://www.tsn.ca",
+  //   userID: "aJ48lW",
+  // },
+  // i3BoGr: {
+  //   longURL: "https://www.google.ca",
+  //   userID: "aJ48lW",
+  // },
 };
 
 // const urlDatabase = {
@@ -56,7 +56,7 @@ app.get("/urls", (req, res) => {  // main render to url
   
   const cookieId = req.session.id;
   const user = users[cookieId];
-  const filtered = urlsForUser(req.session.id)  
+  const filtered = urlsForUser(req.session.id, urlDatabase)  
   const templateVars = {
     urls: filtered,
     user
