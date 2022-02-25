@@ -26,6 +26,7 @@
           <tr>
             <td><%= url %>
             <td><%= urls[url].longURL %></td>
+            
             <td><form method="POST" action="/urls/<%= url %>/delete">
               <button type="submit" class="btn btn-danger">Delete</button>
             </form></td>
@@ -33,7 +34,6 @@
               <input name = "longURL">
               <button type="submit" class="btn btn-danger">Update</button>
             </form></td>
-
           </tr>
         <% } %>
       </tbody>
