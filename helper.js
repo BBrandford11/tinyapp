@@ -1,17 +1,16 @@
-const { urlDatabase, users } = require("./express_server")
+const { urlDatabase, users } = require("./express_server");
 
-const urlsForUser = function(id, urlDatabase) {
-  const usersUrls = {}
+const urlsForUser = function (id, urlDatabase) {
+  const usersUrls = {};
   for (const shortUrl in urlDatabase) {
-    if(urlDatabase[shortUrl].userID === id) {
-      usersUrls[shortUrl] = urlDatabase[shortUrl]
+    if (urlDatabase[shortUrl].userID === id) {
+      usersUrls[shortUrl] = urlDatabase[shortUrl];
     }
   }
-  return usersUrls
-
-}
-const userExists = function (email, users) {  //loop to check if email already exitsts
-  for (let key in users) {
+  return usersUrls;
+};
+const userExists = function (email, users) {
+   for (let key in users) {
     if (users[key].email === email) {
       return users[key];
     }
@@ -26,7 +25,7 @@ const getUserByEmail = function (email, usersDatabase) {
   }
 };
 
-const emailExists = function (email) {  //loop to check if email already exitsts
+const emailExists = function (email) {
   for (let key in users) {
     if (users[key].email === email) {
       return key;
@@ -48,5 +47,5 @@ module.exports = {
   userExists,
   emailExists,
   emailChecker,
-  getUserByEmail
-}
+  getUserByEmail,
+};
