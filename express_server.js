@@ -27,8 +27,8 @@ app.use(
     if (!req.session.id) {
       res.redirect("/login");
     }
-    const cookieId = req.session.id;
-    const user = users[cookieId];
+    
+    const user = users[req.session.id];
     const templateVars = {
       urlDatabase,
       user,
@@ -38,8 +38,7 @@ app.use(
   
   // main render to url
   app.get("/urls", (req, res) => { 
-    const cookieId = req.session.id;
-    const user = users[cookieId];
+    const user = users[req.session.id];
     const filtered = urlsForUser(req.session.id, urlDatabase);
     const templateVars = {
       urls: filtered,
@@ -50,40 +49,36 @@ app.use(
   
   // get request to register
   app.get("/register", (req, res) => {
-    const cookieId = req.session.id;
-    const user = users[cookieId];
+    const user = users[req.session.id];
     const templateVars = { urls: urlDatabase, user };
     res.render("register", templateVars);
   });
   
   // get request to login
-  app.get("/login", (req, res) => {
-    const cookieId = req.session.id;
-    const user = users[cookieId];
+  app.get("/login", (req, res) => {    
+    const user = users[req.session.id];
     const templateVars = { urls: urlDatabase, user };
     res.render("login", templateVars);
   });
   
   //get reqest to short url
-  app.get("/urls/:shortURL", (req, res) => {    
-    const shortURL = req.params.shortURL;
-    const url = urlDatabase[shortURL];
+  app.get("/urls/:shortURL", (req, res) => {        
+    const url = urlDatabase[req.params.shortURL];
     if (!url) {
       return res.status(400).send("Invalid URL");
     }
-    const longURL = urlDatabase[shortURL].longURL;
-    const cookieId = req.session.id;
-    const user = users[cookieId];
-    
+    const longURL = urlDatabase[req.params.shortURL].longURL;    
+    const user = users[req.session.id];
+
     if (!user) {
       return res.status(400).send("Please log in to see url");
     }
-    if (urlDatabase[shortURL].userID !== user.id) {
+    if (urlDatabase[req.params.shortURL].userID !== user.id) {
       return res.status(400).send("Please create your own url");
     }
     
     const templateVars = {
-      shortURL,
+      shortURL: req.params.shortURL,
       longURL,
       user,
       urlDatabase,
@@ -166,29 +161,26 @@ app.post("/login", (req, res) => {
 });
 
 // create new url
-app.post("/urls", (req, res) => {
-  const cookieId = req.session.id;
-  const user = users[cookieId];
+app.post("/urls", (req, res) => {  
+  const user = users[req.session.id];
   let longURL = req.body.longURL;
   let shortURL = generateRandomString();
   urlDatabase[shortURL] = {
     longURL: longURL,
-    userID: cookieId,
+    userID: req.session.id,
     user,
   };
   res.redirect(`/urls/${shortURL}`);
 });
 
 //delete a url;
-app.post("/urls/:shortURL/delete", (req, res) => {
-  const shortURL = req.params.shortURL;
-  const url = urlDatabase[shortURL];
+app.post("/urls/:shortURL/delete", (req, res) => {  
+  const url = urlDatabase[req.params.shortURL];
   if (!url) {
     return res.status(400).send("Bad Request");
   }
-  const longURL = urlDatabase[shortURL].longURL;
-  const cookieId = req.session.id;
-  const user = users[cookieId];
+  const longURL = urlDatabase[shortURL].longURL;  
+  const user = users[req.session.id];
 
   if (!user || urlDatabase[shortURL].userID !== user.id) {
     return res.status(401).send("You dont have permission to do that!");
@@ -199,25 +191,23 @@ app.post("/urls/:shortURL/delete", (req, res) => {
 });
 
 //edit a url;
-app.post("/urls/:shortURL", (req, res) => {
-  const shortURL = req.params.shortURL;
-  const url = urlDatabase[shortURL];
+app.post("/urls/:shortURL", (req, res) => {  
+  const url = urlDatabase[req.params.shortURL];
   if (!url) {
     return res.status(400).send("Url does not exist");
   }
   if (req.body.longURL === ''){
     return res.status(400).send("Please enter a URL");
   }
-  const longURL = urlDatabase[shortURL].longURL;
-  const cookieId = req.session.id;
-  const user = users[cookieId];
+  const longURL = urlDatabase[req.params.shortURL].longURL;  
+  const user = users[req.session.id];
 
-  if (!user || urlDatabase[shortURL].userID !== user.id) {
+  if (!user || urlDatabase[req.params.shortURL].userID !== user.id) {
     return res.status(401).send("You dont have permission to do that!");
   }
   
   const newURL = req.body.longURL;
-  urlDatabase[shortURL].longURL = newURL;
+  urlDatabase[req.params.shortURL].longURL = newURL;
   res.redirect("/urls");
 });
 
