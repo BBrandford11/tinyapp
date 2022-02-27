@@ -32,6 +32,7 @@ TinyApp is a full stack web application built with Node and Express that allows 
 - all passwords are fully hashed to protect the user from cyber attacks.
 - upon registering/login you will automatically be given an encrypted cookie directly to your browser.
 ###### How to create a new short link
+- Enter localHost:8080 in your browser to view the app
 - Click on new short link in the header and submit a full url to receive your shortened version.
 - Click on My Uls for a complete list of your own shortened versions of the url you submitted.
 - Edit and delete any of your own links from this page as well!  
