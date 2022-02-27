@@ -13,7 +13,7 @@ const urlsForUser = function (id, urlDatabase) {
 
 //takes in the email of the user and the users database. This function returs the user and key to access inside our server
 const userExists = function (email, users) {
-  for (let key in users) {
+  for (const key in users) {
     if (users[key].email === email) {
       return users[key];
     }
@@ -32,7 +32,7 @@ const getUserByEmail = function (email, usersDatabase) {
 
 //takes in the email of the user and the users database. This function returs there key for accessing inside the server
 const emailExists = function (email, users) {
-  for (let key in users) {
+  for (const key in users) {
     if (users[key].email === email) {
       return key;
     }
@@ -49,10 +49,16 @@ const emailChecker = function (email, usersDatabase) {
   return false;
 };
 
+// random generator for URL Id. 
+function generateRandomString(length = 6) {
+  return Math.random().toString(20).substr(2, length);
+}
+
 module.exports = {
   urlsForUser,
   userExists,
   emailExists,
   emailChecker,
   getUserByEmail,
+  generateRandomString
 };

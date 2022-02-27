@@ -4,7 +4,12 @@ const PORT = 8080;
 const bodyParser = require("body-parser");
 const bcrypt = require("bcryptjs");
 const cookieSession = require("cookie-session");
-const { userExists, emailExists, urlsForUser } = require("./helper");
+const {
+  userExists,
+  emailExists,
+  urlsForUser,
+  generateRandomString,
+} = require("./helper");
 
 app.set("view engine", "ejs");
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -230,11 +235,6 @@ app.post("/logout", (req, res) => {
   req.session = null;
   res.redirect("/login");
 });
-
-// random generator for URL Id
-function generateRandomString(length = 6) {
-  return Math.random().toString(20).substr(2, length);
-}
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
