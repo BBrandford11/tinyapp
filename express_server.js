@@ -118,6 +118,9 @@ app.post("/urls/:shortURL", (req, res) => {
   if (!url) {
     return res.status(400).send("Url does not exist");
   }
+  if (req.body.longURL === ''){
+    return res.status(400).send("Please enter a URL");
+  }
   const longURL = urlDatabase[shortURL].longURL;
   const cookieId = req.session.id;
   const user = users[cookieId];
