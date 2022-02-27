@@ -25,7 +25,7 @@ app.use(
   //Renders a new url page
   app.get("/urls/new", (req, res) => { 
     const user = users[req.session.id];
-    
+
     if (!req.session.id) {
       res.redirect("/login");
     }
@@ -41,6 +41,9 @@ app.use(
   app.get("/urls", (req, res) => { 
     const user = users[req.session.id];
     const filtered = urlsForUser(req.session.id, urlDatabase);
+    if (!user) {
+      return res.status(400).send("Please log in to see and create your own urls");
+    }
     const templateVars = {
       urls: filtered,
       user,
@@ -126,11 +129,12 @@ app.use(
   app.post("/register", (req, res) => {
     const { email, password } = req.body;
     const id = generateRandomString();
+
     if (!email || !password) {
       return res.status(400).send("Email and password should not be empty.");
   }
   
-  if (emailExists(email)) {
+  if (emailExists(email, users)) {
     return res.status(400).send("Email already exists");
   }
   const hashedPassword = bcrypt.hashSync(password, 10);
@@ -182,14 +186,14 @@ app.post("/urls/:shortURL/delete", (req, res) => {
   if (!url) {
     return res.status(400).send("Bad Request");
   }
-  const longURL = urlDatabase[shortURL].longURL;  
+  const longURL = urlDatabase[req.params.shortURL].longURL;  
   const user = users[req.session.id];
 
-  if (!user || urlDatabase[shortURL].userID !== user.id) {
+  if (!user || urlDatabase[req.params.shortURL].userID !== user.id) {
     return res.status(401).send("You dont have permission to do that!");
   }
 
-  delete urlDatabase[shortURL];
+  delete urlDatabase[req.params.shortURL];
   res.redirect("/urls");
 });
 
@@ -214,19 +218,11 @@ app.post("/urls/:shortURL", (req, res) => {
   res.redirect("/urls");
 });
 
-
-
 //logout
 app.post("/logout", (req, res) => {
   console.log("logout");
   req.session = null;
-  res.redirect("/urls");
-});
-
-
-
-app.listen(PORT, () => {
-  console.log(`Example app listening on port ${PORT}!`);
+  res.redirect("/login");
 });
 
 // random generator for URL Id
@@ -234,6 +230,9 @@ function generateRandomString(length = 6) {
   return Math.random().toString(20).substr(2, length);
 }
 
+app.listen(PORT, () => {
+  console.log(`Example app listening on port ${PORT}!`);
+});
 module.exports = {
   urlDatabase,
   users,

@@ -25,7 +25,7 @@ const getUserByEmail = function (email, usersDatabase) {
   }
 };
 
-const emailExists = function (email) {
+const emailExists = function (email, users) {
   for (let key in users) {
     if (users[key].email === email) {
       return key;
