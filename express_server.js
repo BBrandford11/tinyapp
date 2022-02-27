@@ -24,11 +24,12 @@ app.use(
   
   //Renders a new url page
   app.get("/urls/new", (req, res) => { 
+    const user = users[req.session.id];
+    
     if (!req.session.id) {
       res.redirect("/login");
     }
     
-    const user = users[req.session.id];
     const templateVars = {
       urlDatabase,
       user,
@@ -64,15 +65,17 @@ app.use(
   //get reqest to short url
   app.get("/urls/:shortURL", (req, res) => {        
     const url = urlDatabase[req.params.shortURL];
+    const longURL = urlDatabase[req.params.shortURL].longURL;    
+    const user = users[req.session.id];
+
     if (!url) {
       return res.status(400).send("Invalid URL");
     }
-    const longURL = urlDatabase[req.params.shortURL].longURL;    
-    const user = users[req.session.id];
 
     if (!user) {
       return res.status(400).send("Please log in to see url");
     }
+
     if (urlDatabase[req.params.shortURL].userID !== user.id) {
       return res.status(400).send("Please create your own url");
     }
